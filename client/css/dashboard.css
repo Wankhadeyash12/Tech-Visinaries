@@ -24,9 +24,145 @@
 /* Events Container */
 .events-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
   gap: 2rem;
   margin-bottom: 2rem;
+}
+
+/* Event Card Browse Styles */
+.event-card-browse {
+  background: white;
+  border-radius: var(--border-radius);
+  box-shadow: var(--box-shadow);
+  overflow: hidden;
+  transition: all 0.3s;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 480px;
+}
+
+.event-card-browse:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+}
+
+.event-banner-container {
+  width: 100%;
+  height: 200px;
+  overflow: hidden;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  position: relative;
+}
+
+.event-banner-container img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.event-card-browse-content {
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+}
+
+.event-card-browse h3 {
+  color: var(--secondary-color);
+  font-size: 1.2rem;
+  margin-bottom: 0.5rem;
+  line-height: 1.4;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.event-meta-compact {
+  font-size: 0.9rem;
+  color: #666;
+  margin-bottom: 1rem;
+  display: grid;
+  gap: 0.4rem;
+}
+
+.event-meta-compact p {
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.event-organizer {
+  font-size: 0.85rem;
+  color: #999;
+  margin-bottom: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid #ecf0f1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.event-actions-browse {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: auto;
+  padding-top: 1rem;
+  border-top: 1px solid #ecf0f1;
+}
+
+.event-actions-browse button {
+  flex: 1;
+  padding: 10px 12px;
+  font-size: 0.9rem;
+  min-width: 0;
+}
+
+/* Search and Filter Bar */
+.search-filter-bar {
+  display: grid;
+  grid-template-columns: 1fr auto auto auto;
+  gap: 0.75rem;
+  align-items: center;
+  margin-bottom: 2rem;
+}
+
+.search-filter-bar input {
+  padding: 10px 12px;
+  border: 1px solid #bdc3c7;
+  border-radius: 8px;
+  font-size: 1rem;
+  transition: border-color 0.3s;
+}
+
+.search-filter-bar input:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+}
+
+.search-filter-bar select {
+  padding: 10px 12px;
+  border: 1px solid #bdc3c7;
+  border-radius: 8px;
+  font-size: 1rem;
+  background-color: white;
+  cursor: pointer;
+  transition: border-color 0.3s;
+}
+
+.search-filter-bar select:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
 }
 
 .event-card {
@@ -165,7 +301,11 @@
 /* Responsive */
 @media (max-width: 1024px) {
   .events-grid {
-    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  }
+
+  .event-card-browse {
+    min-height: 450px;
   }
 }
 
@@ -176,8 +316,26 @@
     gap: 1rem;
   }
 
-  .events-grid {
+  .search-filter-bar {
     grid-template-columns: 1fr;
+  }
+
+  .events-grid {
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 1.5rem;
+  }
+
+  .event-card-browse {
+    min-height: 420px;
+  }
+
+  .event-banner-container {
+    height: 180px;
+  }
+
+  .event-actions-browse button {
+    padding: 8px 10px;
+    font-size: 0.85rem;
   }
 
   .event-actions {
@@ -195,5 +353,31 @@
   .registrations-table th,
   .registrations-table td {
     padding: 8px;
+  }
+}
+
+@media (max-width: 480px) {
+  .events-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .event-card-browse {
+    min-height: auto;
+  }
+
+  .event-banner-container {
+    height: 160px;
+  }
+
+  .event-card-browse-content {
+    padding: 1rem;
+  }
+
+  .event-meta-compact {
+    font-size: 0.85rem;
+  }
+
+  .event-card-browse h3 {
+    font-size: 1.1rem;
   }
 }

@@ -42,20 +42,19 @@
     <div id="available-tab" class="tab-content" style="display: none;">
       <h2 style="margin-bottom: 1rem; color: #2c3e50;">Available Events to Join</h2>
       
-      <div class="search-filter-bar" style="margin-bottom: 2rem;">
+      <div class="search-filter-bar">
         <input 
           type="text" 
           id="browseSearchInput" 
           placeholder="Search events..." 
-          style="padding: 10px 12px; border: 1px solid #bdc3c7; border-radius: 8px; width: 100%;"
         >
-        <select id="browseModeFilter" style="padding: 10px 12px; border: 1px solid #bdc3c7; border-radius: 8px;">
+        <select id="browseModeFilter">
           <option value="">All Modes</option>
           <option value="online">Online</option>
           <option value="offline">Offline</option>
           <option value="hybrid">Hybrid</option>
         </select>
-        <button class="btn-primary" onclick="browseAvailableEvents()" style="margin-left: 0.5rem;">Search</button>
+        <button class="btn-primary" onclick="browseAvailableEvents()">Search</button>
       </div>
 
       <div id="availableEventsContainer" class="events-grid">
