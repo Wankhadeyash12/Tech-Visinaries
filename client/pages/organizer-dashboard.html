@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Organizer Dashboard - FlexHub</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="stylesheet" href="/css/dashboard.css">
+</head>
+<body>
+  <nav>
+    <h1>🎉 FlexHub - Organizer Dashboard</h1>
+    <div>
+      <a href="/">Home</a>
+      <a href="/analytics">Analytics</a>
+    </div>
+    <div id="nav-user-info"></div>
+  </nav>
+
+  <div class="container">
+    <div class="dashboard-header">
+      <h1>Your Events</h1>
+      <button id="createEventBtn" class="btn-primary">+ Create New Event</button>
+    </div>
+
+    <!-- Summary Stats -->
+    <div class="dashboard-stats" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.5rem; margin-bottom: 2rem;">
+      <div class="stat-card" style="background: white; padding: 1.5rem; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); border-left: 4px solid #3498db;">
+        <p style="color: #666; margin: 0 0 0.5rem 0; font-size: 0.9rem;">Total Events</p>
+        <p style="color: #3498db; font-size: 2rem; font-weight: bold; margin: 0;" id="totalEventsCount">0</p>
+      </div>
+      <div class="stat-card" style="background: white; padding: 1.5rem; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); border-left: 4px solid #2ecc71;">
+        <p style="color: #666; margin: 0 0 0.5rem 0; font-size: 0.9rem;">Total Registrations</p>
+        <p style="color: #2ecc71; font-size: 2rem; font-weight: bold; margin: 0;" id="totalRegistrationsCount">0</p>
+      </div>
+      <div class="stat-card" style="background: white; padding: 1.5rem; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); border-left: 4px solid #f39c12;">
+        <p style="color: #666; margin: 0 0 0.5rem 0; font-size: 0.9rem;">Published Events</p>
+        <p style="color: #f39c12; font-size: 2rem; font-weight: bold; margin: 0;" id="publishedEventsCount">0</p>
+      </div>
+      <div class="stat-card" style="background: white; padding: 1.5rem; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); border-left: 4px solid #9b59b6;">
+        <p style="color: #666; margin: 0 0 0.5rem 0; font-size: 0.9rem;">Pending Approvals</p>
+        <p style="color: #9b59b6; font-size: 2rem; font-weight: bold; margin: 0;" id="pendingApprovalsCount">0</p>
+      </div>
+    </div>
+
+    <!-- Tabs -->
+    <div class="tabs-nav" style="display: flex; gap: 1rem; margin-bottom: 2rem; border-bottom: 2px solid #ecf0f1;">
+      <button class="tab-link active" onclick="switchOrganizerTab('all-events')" style="padding: 10px 20px; background: none; border: none; border-bottom: 3px solid transparent; cursor: pointer; font-weight: 600; color: #666; transition: all 0.3s;">
+        All Events
+      </button>
+      <button class="tab-link" onclick="switchOrganizerTab('published')" style="padding: 10px 20px; background: none; border: none; border-bottom: 3px solid transparent; cursor: pointer; font-weight: 600; color: #666; transition: all 0.3s;">
+        Published
+      </button>
+      <button class="tab-link" onclick="switchOrganizerTab('drafts')" style="padding: 10px 20px; background: none; border: none; border-bottom: 3px solid transparent; cursor: pointer; font-weight: 600; color: #666; transition: all 0.3s;">
+        Drafts
+      </button>
+    </div>
+
+    <div id="eventsContainer" class="events-grid">
+      <div style="text-align: center; grid-column: 1 / -1;">
+        <p>Loading events...</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Registrations Modal -->
+  <div id="registrationsModal" class="modal"></div>
+
+  <style>
+    .tab-link.active {
+      color: #3498db;
+      border-bottom-color: #3498db;
+    }
+
+    .tab-link:hover {
+      color: #3498db;
+    }
+  </style>
+
+  <script src="/js/api.js"></script>
+  <script src="/js/auth.js"></script>
+  <script>
+    let allOrganizerEvents = [];
+    let currentOrganizerTab = 'all-events';
+
+    document.addEventListener('DOMContentLoaded', () => {
+      redirectIfNotRole('organizer');
+      setupOrganizerDashboard();
+      updateNavigation();
+    });
+
+    const setupOrganizerDashboard = async () => {
+      try {
+        const response = await eventAPI.getOrganizerEvents();
+        allOrganizerEvents = response.events;
+
+        // Update stats
+        updateOrganizerStats();
+        displayOrganizerEvents(allOrganizerEvents);
+        setupEventActionButtons();
+      } catch (error) {
+        alert('Error loading events: ' + error.message);
+      }
+    };
+
+    const updateOrganizerStats = () => {
+      const total = allOrganizerEvents.length;
+      const published = allOrganizerEvents.filter(e => e.isPublished).length;
+      const drafts = total - published;
+      
+      let pendingApprovals = 0;
+      allOrganizerEvents.forEach(event => {
+        pendingApprovals += event.totalRegistrations; // This would need to be calculated properly
+      });
+
+      document.getElementById('totalEventsCount').textContent = total;
+      document.getElementById('publishedEventsCount').textContent = published;
+      document.getElementById('pendingApprovalsCount').textContent = drafts;
+      document.getElementById('totalRegistrationsCount').textContent = allOrganizerEvents.reduce((sum, e) => sum + e.totalRegistrations, 0);
+    };
+
+    const switchOrganizerTab = (tabName) => {
+      currentOrganizerTab = tabName;
+      
+      document.querySelectorAll('.tab-link').forEach(link => {
+        link.classList.remove('active');
+      });
+      event.target.classList.add('active');
+
+      let filteredEvents = allOrganizerEvents;
+      
+      if (tabName === 'published') {
+        filteredEvents = allOrganizerEvents.filter(e => e.isPublished);
+      } else if (tabName === 'drafts') {
+        filteredEvents = allOrganizerEvents.filter(e => !e.isPublished);
+      }
+
+      displayOrganizerEvents(filteredEvents);
+    };
+
+    const displayOrganizerEvents = (events) => {
+      const container = document.getElementById('eventsContainer');
+      
+      if (events.length === 0) {
+        container.innerHTML = '<div style="grid-column: 1 / -1; text-align: center; padding: 2rem;"><p>No events to display. <a href="/create-event" style="color: #3498db;">Create your first event</a></p></div>';
+        return;
+      }
+
+      container.innerHTML = events
+        .map((event) => {
+          const eventDate = new Date(event.eventDateTime).toLocaleDateString();
+          const status = event.isPublished ? 'Published' : 'Draft';
+          const statusClass = event.isPublished ? 'status-published' : 'status-draft';
+
+          return `
+            <div class="event-card">
+              <div class="event-card-header">
+                <h3>${event.title}</h3>
+                <span class="status ${statusClass}">${status}</span>
+              </div>
+              <p><strong>Date:</strong> ${eventDate}</p>
+              <p><strong>Mode:</strong> ${event.eventMode.toUpperCase()}</p>
+              <p><strong>Team Size:</strong> ${event.teamMinSize} - ${event.teamMaxSize}</p>
+              <p><strong>Registrations:</strong> <span style="color: #3498db; font-weight: bold;">${event.totalRegistrations}</span></p>
+              <p><strong>Fee:</strong> ₹${event.registrationFee}</p>
+              <div class="event-actions">
+                ${!event.isPublished ? `
+                  <button class="btn-publish" onclick="publishEvent('${event._id}')">Publish</button>
+                ` : ''}
+                <button class="btn-view" onclick="viewEventRegistrations('${event._id}', '${event.title}')">View Registrations</button>
+                <button class="btn-analytics" onclick="viewEventAnalytics('${event._id}', '${event.title}')">Analytics</button>
+                <button class="btn-edit" onclick="editEvent('${event._id}')">Edit</button>
+                <button class="btn-delete" onclick="deleteEvent('${event._id}')">Delete</button>
+              </div>
+            </div>
+          `;
+        })
+        .join('');
+    };
+
+    const publishEvent = async (eventId) => {
+      try {
+        await eventAPI.publishEvent(eventId);
+        alert('Event published successfully! 🎉');
+        setupOrganizerDashboard();
+      } catch (error) {
+        alert('Error publishing event: ' + error.message);
+      }
+    };
+
+    const viewEventRegistrations = (eventId, eventTitle) => {
+      eventAPI.getEventRegistrations(eventId)
+        .then((response) => {
+          const registrations = response.registrations;
+          displayRegistrationsModal(registrations, eventId, eventTitle);
+        })
+        .catch((error) => {
+          alert('Error loading registrations: ' + error.message);
+        });
+    };
+
+    const displayRegistrationsModal = (registrations, eventId, eventTitle) => {
+      let modal = document.getElementById('registrationsModal');
+
+      if (registrations.length === 0) {
+        modal.innerHTML = `
+          <div class="modal-content">
+            <span class="close" onclick="document.getElementById('registrationsModal').style.display='none'">&times;</span>
+            <h2>Registrations for ${eventTitle}</h2>
+            <p style="text-align: center; color: #999;">No registrations yet.</p>
+          </div>
+        `;
+      } else {
+        const registrationsHTML = registrations
+          .map((reg) => `
+            <tr>
+              <td>${reg.participant.name}</td>
+              <td>${reg.participant.email}</td>
+              <td>${reg.teamName}</td>
+              <td>${reg.teamMembers.length}</td>
+              <td><span class="status status-${reg.approvalStatus.toLowerCase()}">${reg.approvalStatus}</span></td>
+              <td><span class="status status-${reg.paymentStatus.toLowerCase()}">${reg.paymentStatus}</span></td>
+              <td>
+                ${reg.approvalStatus === 'Pending' ? `
+                  <button onclick="approveRegistration('${reg._id}')" class="btn-approve">Approve</button>
+                  <button onclick="rejectRegistration('${reg._id}')" class="btn-reject">Reject</button>
+                ` : `${reg.approvalStatus}`}
+              </td>
+            </tr>
+          `)
+          .join('');
+
+        modal.innerHTML = `
+          <div class="modal-content">
+            <span class="close" onclick="document.getElementById('registrationsModal').style.display='none'">&times;</span>
+            <h2>Registrations for ${eventTitle}</h2>
+            <div style="overflow-x: auto;">
+              <table class="registrations-table">
+                <thead>
+                  <tr>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Team Name</th>
+                    <th>Team Size</th>
+                    <th>Approval</th>
+                    <th>Payment</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  ${registrationsHTML}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        `;
+      }
+
+      modal.style.display = 'block';
+    };
+
+    const approveRegistration = async (registrationId) => {
+      try {
+        await registrationAPI.approveRegistration(registrationId);
+        alert('Registration approved! ✓');
+        document.getElementById('registrationsModal').style.display = 'none';
+        setupOrganizerDashboard();
+      } catch (error) {
+        alert('Error approving registration: ' + error.message);
+      }
+    };
+
+    const rejectRegistration = async (registrationId) => {
+      try {
+        await registrationAPI.rejectRegistration(registrationId);
+        alert('Registration rejected! ✗');
+        document.getElementById('registrationsModal').style.display = 'none';
+        setupOrganizerDashboard();
+      } catch (error) {
+        alert('Error rejecting registration: ' + error.message);
+      }
+    };
+
+    const viewEventAnalytics = (eventId, eventTitle) => {
+      window.location.href = `/analytics?eventId=${eventId}&eventTitle=${encodeURIComponent(eventTitle)}`;
+    };
+
+    const editEvent = (eventId) => {
+      alert('Edit functionality coming soon!');
+    };
+
+    const deleteEvent = (eventId) => {
+      if (confirm('Are you sure you want to delete this event? This action cannot be undone.')) {
+        eventAPI.deleteEvent(eventId)
+          .then(() => {
+            alert('Event deleted successfully!');
+            setupOrganizerDashboard();
+          })
+          .catch((error) => {
+            alert('Error deleting event: ' + error.message);
+          });
+      }
+    };
+
+    const setupEventActionButtons = () => {
+      const createBtn = document.getElementById('createEventBtn');
+      if (createBtn) {
+        createBtn.onclick = () => {
+          window.location.href = '/create-event';
+        };
+      }
+    };
+  </script>
+</body>
+</html>
+

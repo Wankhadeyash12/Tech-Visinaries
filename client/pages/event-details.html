@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Event Details - FlexHub</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="stylesheet" href="/css/event.css">
+</head>
+<body>
+  <nav>
+    <h1>🎉 FlexHub - Event Details</h1>
+    <div>
+      <a href="/">Home</a>
+      <a href="/browse-events">Browse Events</a>
+      <a href="/participant-dashboard">My Dashboard</a>
+    </div>
+    <div id="nav-user-info"></div>
+  </nav>
+
+  <div class="container">
+    <div id="eventDetails" style="margin-bottom: 2rem;">
+      <p style="text-align: center;">Loading event details...</p>
+    </div>
+
+    <div class="registration-form-container" id="registrationSection" style="display: none;">
+      <h2>Register for This Event</h2>
+      
+      <form id="registrationForm">
+        <div class="form-group">
+          <label for="teamName">Team Name *</label>
+          <input type="text" id="teamName" name="teamName" required placeholder="Enter your team name">
+        </div>
+
+        <div class="form-group">
+          <label for="teamSize">Number of Team Members *</label>
+          <input type="number" id="teamSize" name="teamSize" required min="1" max="10" placeholder="1">
+        </div>
+
+        <div id="teamMembersContainer" class="team-members-container">
+          <!-- Team member inputs will be generated here -->
+        </div>
+
+        <button type="submit" class="form-submit">Complete Registration</button>
+      </form>
+    </div>
+  </div>
+
+  <script src="/js/api.js"></script>
+  <script src="/js/auth.js"></script>
+  <script>
+    let currentEvent = null;
+
+    document.addEventListener('DOMContentLoaded', () => {
+      setupEventDetailsView();
+      updateNavigation();
+    });
+
+    const setupEventDetailsView = async () => {
+      const urlParams = new URLSearchParams(window.location.search);
+      const eventSlug = urlParams.get('slug');
+
+      if (!eventSlug) {
+        alert('Event not found');
+        window.location.href = '/browse-events';
+        return;
+      }
+
+      try {
+        const response = await eventAPI.getEventBySlug(eventSlug);
+        currentEvent = response.event;
+
+        displayEventDetails(currentEvent);
+
+        // Show registration form only if user is logged in and is participant
+        if (isLoggedIn()) {
+          const user = getLoggedInUser();
+          if (user.role === 'participant') {
+            document.getElementById('registrationSection').style.display = 'block';
+            setupRegistrationForm(currentEvent);
+          }
+        }
+      } catch (error) {
+        alert('Error loading event: ' + error.message);
+        window.location.href = '/browse-events';
+      }
+    };
+
+    const displayEventDetails = (event) => {
+      const container = document.getElementById('eventDetails');
+      if (!container) return;
+
+      const eventDate = new Date(event.eventDateTime).toLocaleString();
+      const deadlineDate = new Date(event.registrationDeadline).toLocaleString();
+
+      container.innerHTML = `
+        <div class="event-header">
+          ${event.bannerImage ? `<img src="${event.bannerImage}" alt="${event.title}" class="event-banner">` : ''}
+          <h1>${event.title}</h1>
+        </div>
+        <div class="event-details-section">
+          <div class="event-meta">
+            <p><strong>Mode:</strong> ${event.eventMode.toUpperCase()}</p>
+            <p><strong>Date & Time:</strong> ${eventDate}</p>
+            <p><strong>Registration Deadline:</strong> ${deadlineDate}</p>
+            <p><strong>Team Size:</strong> ${event.teamMinSize} - ${event.teamMaxSize} members</p>
+            <p><strong>Registration Fee:</strong> ₹${event.registrationFee}</p>
+          </div>
+          
+          <div class="event-info">
+            <h3>Description</h3>
+            <p>${event.description}</p>
+            
+            ${event.rules ? `<h3>Rules & Guidelines</h3>
+            <p>${event.rules}</p>` : ''}
+            
+            ${event.eventMode === 'offline' || event.eventMode === 'hybrid' 
+              ? `<p><strong>Venue:</strong> ${event.venue}</p>` 
+              : ''}
+            
+            ${event.eventMode === 'online' || event.eventMode === 'hybrid' 
+              ? `<p><strong>Meeting Link:</strong> <a href="${event.meetingLink}" target="_blank">${event.meetingLink}</a></p>` 
+              : ''}
+            
+            <div style="margin-top: 1.5rem; padding: 1rem; background: #f8f9fa; border-radius: 6px;">
+              <p><strong>Total Registrations:</strong> ${event.totalRegistrations}</p>
+            </div>
+          </div>
+          
+          <div class="organizer-info">
+            <h4>Organized by: ${event.organizer.name}</h4>
+            <p>Email: ${event.organizer.email}</p>
+          </div>
+        </div>
+      `;
+    };
+
+    const setupRegistrationForm = (event) => {
+      const form = document.getElementById('registrationForm');
+      if (!form) return;
+
+      // Initialize team members input
+      updateTeamMemberInputs(event.teamMinSize);
+
+      // Team size change handler
+      document.getElementById('teamSize')?.addEventListener('change', (e) => {
+        const size = parseInt(e.target.value);
+        if (size >= event.teamMinSize && size <= event.teamMaxSize) {
+          updateTeamMemberInputs(size);
+        } else {
+          alert(`Team size must be between ${event.teamMinSize} and ${event.teamMaxSize}`);
+          e.target.value = event.teamMinSize;
+          updateTeamMemberInputs(event.teamMinSize);
+        }
+      });
+
+      // Form submission
+      form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        const teamName = document.getElementById('teamName').value;
+        const teamSize = parseInt(document.getElementById('teamSize').value);
+
+        // Validate team size
+        if (teamSize < event.teamMinSize || teamSize > event.teamMaxSize) {
+          alert(`Team size must be between ${event.teamMinSize} and ${event.teamMaxSize}`);
+          return;
+        }
+
+        // Collect team members
+        const teamMembers = [];
+        for (let i = 0; i < teamSize; i++) {
+          const name = document.getElementById(`memberName${i}`)?.value;
+          const email = document.getElementById(`memberEmail${i}`)?.value;
+          
+          if (!name || !email) {
+            alert('Please fill in all team member details');
+            return;
+          }
+          
+          teamMembers.push({ name, email });
+        }
+
+        const registrationData = {
+          eventSlug: event.slug,
+          teamName,
+          teamMembers,
+        };
+
+        try {
+          await registrationAPI.registerForEvent(registrationData);
+          alert('🎉 Registration successful! Check your dashboard for status.');
+          window.location.href = '/participant-dashboard';
+        } catch (error) {
+          alert('Error registering for event: ' + error.message);
+        }
+      });
+    };
+
+    const updateTeamMemberInputs = (count) => {
+      const container = document.getElementById('teamMembersContainer');
+      if (!container) return;
+
+      container.innerHTML = '';
+      
+      for (let i = 0; i < count; i++) {
+        const memberDiv = document.createElement('div');
+        memberDiv.className = 'team-member-input';
+        memberDiv.innerHTML = `
+          <h4>Team Member ${i + 1}</h4>
+          <input 
+            type="text" 
+            id="memberName${i}" 
+            placeholder="Full Name" 
+            required
+          >
+          <input 
+            type="email" 
+            id="memberEmail${i}" 
+            placeholder="Email Address" 
+            required
+          >
+        `;
+        container.appendChild(memberDiv);
+      }
+    };
+  </script>
+</body>
+</html>
+

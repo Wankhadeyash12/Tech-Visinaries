@@ -1,0 +1,199 @@
+/* Dashboard Specific Styles */
+
+.dashboard-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+}
+
+.dashboard-header h1 {
+  font-size: 2.5rem;
+  color: var(--secondary-color);
+}
+
+.dashboard-header button {
+  background-color: var(--primary-color);
+  color: white;
+}
+
+.dashboard-header button:hover {
+  background-color: #2980b9;
+}
+
+/* Events Container */
+.events-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+  gap: 2rem;
+  margin-bottom: 2rem;
+}
+
+.event-card {
+  background: white;
+  border-radius: var(--border-radius);
+  box-shadow: var(--box-shadow);
+  padding: 1.5rem;
+  transition: all 0.3s;
+  display: flex;
+  flex-direction: column;
+}
+
+.event-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+}
+
+.event-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: start;
+  margin-bottom: 1rem;
+  border-bottom: 2px solid var(--light-gray);
+  padding-bottom: 1rem;
+}
+
+.event-card-header h3 {
+  font-size: 1.3rem;
+  COLOR: var(--secondary-color);
+  flex: 1;
+}
+
+.event-card p {
+  margin: 0.5rem 0;
+  color: #666;
+}
+
+.event-actions {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: auto;
+  padding-top: 1rem;
+  border-top: 1px solid var(--light-gray);
+  flex-wrap: wrap;
+}
+
+.event-actions button {
+  flex: 1;
+  min-width: 100px;
+  padding: 8px 12px;
+  font-size: 0.85rem;
+}
+
+/* Registrations Container */
+.registrations-container {
+  margin-top: 2rem;
+}
+
+.registration-card {
+  background: white;
+  border-radius: var(--border-radius);
+  box-shadow: var(--box-shadow);
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+  border-left: 4px solid var(--primary-color);
+}
+
+.registration-header {
+  margin-bottom: 1rem;
+  border-bottom: 2px solid var(--light-gray);
+  padding-bottom: 1rem;
+}
+
+.registration-header h3 {
+  color: var(--secondary-color);
+  font-size: 1.3rem;
+}
+
+.registration-card p {
+  margin: 0.5rem 0;
+}
+
+/* Registrations Table */
+.registrations-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 1rem;
+}
+
+.registrations-table thead {
+  background-color: var(--secondary-color);
+  color: white;
+}
+
+.registrations-table th,
+.registrations-table td {
+  padding: 12px;
+  text-align: left;
+  border-bottom: 1px solid #ecf0f1;
+}
+
+.registrations-table tbody tr:hover {
+  background-color: #f8f9fa;
+}
+
+.registrations-table .btn-approve,
+.registrations-table .btn-reject {
+  padding: 5px 10px;
+  font-size: 0.8rem;
+}
+
+/* Empty State */
+.empty-state {
+  text-align: center;
+  padding: 3rem 1rem;
+  background: white;
+  border-radius: var(--border-radius);
+  box-shadow: var(--box-shadow);
+}
+
+.empty-state h2 {
+  color: var(--dark-gray);
+  margin-bottom: 1rem;
+}
+
+.empty-state a {
+  color: var(--primary-color);
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.empty-state a:hover {
+  text-decoration: underline;
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+  .events-grid {
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  }
+}
+
+@media (max-width: 768px) {
+  .dashboard-header {
+    flex-direction: column;
+    align-items: start;
+    gap: 1rem;
+  }
+
+  .events-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .event-actions {
+    flex-direction: column;
+  }
+
+  .event-actions button {
+    width: 100%;
+  }
+
+  .registrations-table {
+    font-size: 0.9rem;
+  }
+
+  .registrations-table th,
+  .registrations-table td {
+    padding: 8px;
+  }
+}

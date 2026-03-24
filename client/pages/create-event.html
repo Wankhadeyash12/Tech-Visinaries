@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Create Event - FlexHub</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="stylesheet" href="/css/event.css">
+</head>
+<body>
+  <nav>
+    <h1>🎉 FlexHub - Create Event</h1>
+    <div>
+      <a href="/">Home</a>
+      <a href="/organizer-dashboard">Dashboard</a>
+    </div>
+    <div id="nav-user-info"></div>
+  </nav>
+
+  <div class="container">
+    <form id="createEventForm" class="create-event-container">
+      <h1>Create a New Event</h1>
+
+      <div class="form-section">
+        <h3>Basic Information</h3>
+        
+        <div class="form-group">
+          <label for="title">Event Title *</label>
+          <input type="text" id="title" name="title" required placeholder="e.g., Hackathon 2024">
+        </div>
+
+        <div class="form-group">
+          <label for="description">Description *</label>
+          <textarea id="description" name="description" required placeholder="Describe your event in detail..."></textarea>
+        </div>
+
+        <div class="form-group">
+          <label for="rules">Rules & Guidelines</label>
+          <textarea id="rules" name="rules" placeholder="List any rules or guidelines for participants..."></textarea>
+        </div>
+      </div>
+
+      <div class="form-section">
+        <h3>Event Details</h3>
+
+        <div class="form-group-inline">
+          <div class="form-group">
+            <label for="eventMode">Event Mode *</label>
+            <select id="eventMode" name="eventMode" required>
+              <option value="">Select event mode</option>
+              <option value="online">Online</option>
+              <option value="offline">Offline</option>
+              <option value="hybrid">Hybrid</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="eventDateTime">Event Date & Time *</label>
+            <input type="datetime-local" id="eventDateTime" name="eventDateTime" required>
+          </div>
+        </div>
+
+        <div id="venueGroup" class="form-group" style="display: none;">
+          <label for="venue">Venue</label>
+          <input type="text" id="venue" name="venue" placeholder="Event venue address">
+        </div>
+
+        <div id="meetingLinkGroup" class="form-group" style="display: none;">
+          <label for="meetingLink">Meeting Link</label>
+          <input type="url" id="meetingLink" name="meetingLink" placeholder="https://meet.example.com/...">
+        </div>
+      </div>
+
+      <div class="form-section">
+        <h3>Registration Details</h3>
+
+        <div class="form-group">
+          <label for="registrationDeadline">Registration Deadline *</label>
+          <input type="datetime-local" id="registrationDeadline" name="registrationDeadline" required>
+        </div>
+
+        <div class="form-group-inline">
+          <div class="form-group">
+            <label for="teamMinSize">Min Team Size *</label>
+            <input type="number" id="teamMinSize" name="teamMinSize" required min="1" placeholder="1">
+          </div>
+
+          <div class="form-group">
+            <label for="teamMaxSize">Max Team Size *</label>
+            <input type="number" id="teamMaxSize" name="teamMaxSize" required min="1" placeholder="5">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="registrationFee">Registration Fee (in ₹)</label>
+          <input type="number" id="registrationFee" name="registrationFee" min="0" placeholder="0" value="0">
+        </div>
+      </div>
+
+      <div class="form-section">
+        <h3>Event Banner</h3>
+
+        <div class="form-group">
+          <label class="file-input-label">Event Banner Image</label>
+          <div class="file-input-wrapper">
+            <input type="file" id="banner" name="banner" accept="image/*">
+          </div>
+          <small style="color: #666; margin-top: 0.5rem; display: block;">Upload a banner image for your event (JPG, PNG, GIF)</small>
+        </div>
+      </div>
+
+      <button type="submit" class="btn-success" style="width: 100%; padding: 14px; font-size: 1.1rem; margin-top: 1rem;">
+        Create Event
+      </button>
+    </form>
+  </div>
+
+  <script src="/js/api.js"></script>
+  <script src="/js/auth.js"></script>
+  <script src="/js/createEvent.js"></script>
+</body>
+</html>
