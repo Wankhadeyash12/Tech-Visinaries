@@ -9,6 +9,7 @@ const authRoutes = require('./routes/authRoutes');
 const eventRoutes = require('./routes/eventRoutes');
 const registrationRoutes = require('./routes/registrationRoutes');
 const analyticsRoutes = require('./routes/analyticsRoutes');
+const paymentRoutes = require('./routes/paymentRoutes');
 
 const app = express();
 
@@ -17,6 +18,14 @@ connectDB();
 
 // Middleware
 app.use(cors());
+
+// Webhook handling middleware (raw body, must be before JSON parser)
+app.use('/api/payments/webhook', express.raw({ type: 'application/json' }), (req, res, next) => {
+  req.rawBody = req.body;
+  next();
+});
+
+// JSON parser for other requests
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
@@ -29,6 +38,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/events', eventRoutes);
 app.use('/api/registrations', registrationRoutes);
 app.use('/api/analytics', analyticsRoutes);
+app.use('/api/payments', paymentRoutes);
 
 // Serve HTML pages
 app.get('/', (req, res) => {
@@ -69,6 +79,14 @@ app.get('/participant-dashboard', (req, res) => {
 
 app.get('/analytics', (req, res) => {
   res.sendFile(path.join(__dirname, '../client/pages/analytics.html'));
+});
+
+app.get('/payment-success', (req, res) => {
+  res.sendFile(path.join(__dirname, '../client/pages/payment-success.html'));
+});
+
+app.get('/payment-cancel', (req, res) => {
+  res.sendFile(path.join(__dirname, '../client/pages/payment-cancel.html'));
 });
 
 // Error handling middleware

@@ -100,6 +100,16 @@ const registrationAPI = {
     apiCall(`/registrations/${registrationId}/reject`, 'PUT'),
 };
 
+// Payment APIs
+const paymentAPI = {
+  createCheckoutSession: (registrationData) =>
+    apiCall('/payments/create-checkout-session', 'POST', registrationData),
+  getSessionDetails: (sessionId) =>
+    apiCall(`/payments/session-details?sessionId=${sessionId}`),
+  completePayment: (sessionId) =>
+    apiCall('/payments/complete-payment', 'POST', { sessionId }),
+};
+
 // Analytics APIs
 const analyticsAPI = {
   getEventAnalytics: (eventId) => apiCall(`/analytics/event/${eventId}`),

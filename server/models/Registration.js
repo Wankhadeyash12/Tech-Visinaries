@@ -43,6 +43,14 @@ const registrationSchema = new mongoose.Schema(
       type: Number,
       default: 0,
     },
+    stripeSessionId: {
+      type: String,
+      default: null,
+    },
+    stripePaymentIntentId: {
+      type: String,
+      default: null,
+    },
     registeredAt: {
       type: Date,
       default: Date.now,
